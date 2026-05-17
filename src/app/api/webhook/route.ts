@@ -107,8 +107,8 @@ export async function POST(request: Request) {
             prompt: `${firstScene.image_prompt}, a friendly and dignified Korean senior person, realistic photorealistic style, 8k resolution, warm cinematic lighting --ar 9:16`,
             n: 1, size: "1024x1792",
           });
-          const realImageUrl = imageResponse.data[0].url;
-          isRealImage = true;
+          const realImageUrl = imageResponse?.data?.[0]?.url;
+          if (realImageUrl) isRealImage = true;
 
           visualScenes = customScenes.map((sc: any, idx: number) => ({
             ...sc,
