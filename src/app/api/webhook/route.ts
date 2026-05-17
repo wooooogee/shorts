@@ -20,13 +20,79 @@ const SENIOR_IMAGE_URLS = [
   "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80"  // 행복하게 웃는 노부부
 ];
 
+// 🌟 [핵심 추가] 뉴스 주제(Topic)별 스마트 Fallback 대본 및 프롬프트 동적 생성기
+function generateSmartFallback(topic: string) {
+  const cleanTopic = topic || "2026년 기초연금 40만원 인상안 확정";
+  
+  if (cleanTopic.includes("임플란트")) {
+    return {
+      shorts_title: "치과비 70% 아끼는 65세 임플란트 혜택!",
+      scenes: [
+        { scene_id: 1, narration: "치과비 70% 아끼는 65세 임플란트 혜택!", image_prompt: "A dignified elderly Korean man smiling brightly with perfect healthy teeth, dental clinic background", gen_type: "video" },
+        { scene_id: 2, narration: "올해 하반기부터 임플란트 지원이 최대 4개까지 대폭 확대됩니다.", image_prompt: "A Korean senior woman kindly consulting with a friendly dentist in a modern clean clinic", gen_type: "image" },
+        { scene_id: 3, narration: "만 65세 이상 어르신이라면 본인부담금 30%만 내시면 돼요.", image_prompt: "A clean dental chart showing 30 percent cost on a sleek desk with bright lighting", gen_type: "image" },
+        { scene_id: 4, narration: "자주 가시는 동네 치과 병원에 신분증만 챙겨가면 즉시 적용!", image_prompt: "A happy Korean senior walking into a bright modern dental clinic building, sunny day", gen_type: "image" },
+        { scene_id: 5, narration: "돈 버는 시니어 복지 꿀팁, 지금 바로 구독하고 받아보세요!", image_prompt: "A happy Korean elderly couple waving hands, warm cinematic lighting", gen_type: "video" }
+      ]
+    };
+  }
+  if (cleanTopic.includes("노인일자리") || cleanTopic.includes("인턴십")) {
+    return {
+      shorts_title: "월 100만원 보장! 시니어 인턴십 신청하세요",
+      scenes: [
+        { scene_id: 1, narration: "월 100만원 보장! 시니어 인턴십 신청하세요", image_prompt: "A dignified elderly Korean man working enthusiastically in a modern clean office", gen_type: "video" },
+        { scene_id: 2, narration: "보건복지부 주관으로 전국 3천개 기업에서 대규모 모집을 시작했습니다.", image_prompt: "A group of active Korean seniors attending an orientation in a bright seminar room", gen_type: "image" },
+        { scene_id: 3, narration: "업무 강도가 낮고 거주지 근처에서 일할 수 있어 인기가 아주 높아요.", image_prompt: "A Korean senior woman happily assisting a customer at a neat modern library desk", gen_type: "image" },
+        { scene_id: 4, narration: "한국노인인력개발원이나 복지로 홈페이지에서 온라인 즉시 신청!", image_prompt: "A senior man looking at a clean tablet screen showing job application, cozy living room", gen_type: "image" },
+        { scene_id: 5, narration: "돈 버는 시니어 복지 꿀팁, 지금 바로 구독하고 받아보세요!", image_prompt: "A happy Korean elderly couple waving hands, warm cinematic lighting", gen_type: "video" }
+      ]
+    };
+  }
+  if (cleanTopic.includes("교통비") || cleanTopic.includes("패스")) {
+    return {
+      shorts_title: "교통비 0원! 전국 지하철·버스 무료 패스",
+      scenes: [
+        { scene_id: 1, narration: "교통비 0원! 전국 지하철·버스 무료 패스", image_prompt: "A dignified elderly Korean man holding a transport card with a big smile", gen_type: "video" },
+        { scene_id: 2, narration: "기존 지자체별 카드가 하나로 통합되어 전국 어디서나 무료!", image_prompt: "A modern smart card shining on a sleek map of Korea", gen_type: "image" },
+        { scene_id: 3, narration: "만 65세 이상 어르신이라면 누구나 혜택을 누릴 수 있습니다.", image_prompt: "A group of happy Korean seniors boarding a clean modern bus", gen_type: "image" },
+        { scene_id: 4, narration: "가까운 농협이나 신한은행에서 신분증만 내면 즉시 발급!", image_prompt: "A senior woman kindly guided by a bank clerk, bright bank interior", gen_type: "image" },
+        { scene_id: 5, narration: "돈 버는 시니어 복지 꿀팁, 지금 바로 구독하고 받아보세요!", image_prompt: "A happy Korean elderly couple waving hands, warm cinematic lighting", gen_type: "video" }
+      ]
+    };
+  }
+  if (cleanTopic.includes("백신") || cleanTopic.includes("독감")) {
+    return {
+      shorts_title: "비싼 대상포진 백신 0원! 무료 지정병원 확대",
+      scenes: [
+        { scene_id: 1, narration: "비싼 대상포진 백신 0원! 무료 지정병원 확대", image_prompt: "A dignified elderly Korean woman receiving a checkup from a friendly doctor, clean hospital", gen_type: "video" },
+        { scene_id: 2, narration: "비용 부담이 컸던 대상포진과 독감 백신 무료 접종이 대폭 확대됩니다.", image_prompt: "A neat medical chart and a clean vaccine vial on a pristine hospital tray", gen_type: "image" },
+        { scene_id: 3, narration: "전국 5천 곳의 지정된 동네 병의원 어디서나 편하게 맞으실 수 있어요.", image_prompt: "A Korean senior man happily walking out of a modern local clinic building", gen_type: "image" },
+        { scene_id: 4, narration: "질병관리청 홈페이지나 보건소 전화로 가까운 병원을 즉시 확인하세요!", image_prompt: "A Korean senior woman talking on the phone with a public health center, relieved expression", gen_type: "image" },
+        { scene_id: 5, narration: "돈 버는 시니어 복지 꿀팁, 지금 바로 구독하고 받아보세요!", image_prompt: "A happy Korean elderly couple waving hands, warm cinematic lighting", gen_type: "video" }
+      ]
+    };
+  }
+  
+  // 기본 기초연금 / 기타 Fallback
+  return {
+    shorts_title: cleanTopic.length < 25 ? cleanTopic : "월 40만원 기초연금, 아직도 신청 안 하셨나요?",
+    scenes: [
+      { scene_id: 1, narration: cleanTopic.length < 25 ? cleanTopic : "월 40만원 기초연금, 아직도 신청 안 하셨나요?", image_prompt: "A dignified elderly Korean couple holding a bankbook with happy smiles, modern living room, 8k resolution, photorealistic", gen_type: "video" },
+      { scene_id: 2, narration: "내년부터 수급 자격이 대폭 완화되어 더 많은 분들이 혜택을 받습니다.", image_prompt: "A Korean senior woman talking on the phone with a community center, relieved expression, warm lighting", gen_type: "image" },
+      { scene_id: 3, narration: "단독가구 기준 월 소득 인정액이 250만원 이하면 가능해요.", image_prompt: "A clean graphic chart showing income criteria on a wooden table next to a coffee cup", gen_type: "image" },
+      { scene_id: 4, narration: "주민센터나 복지로 홈페이지에서 신분증만 있으면 즉시 신청!", image_prompt: "A Korean senior man walking happily towards a bright community center building, sunny day", gen_type: "image" },
+      { scene_id: 5, narration: "더 많은 시니어 꿀팁을 원하시면 구독과 좋아요 눌러주세요!", image_prompt: "A happy Korean elderly couple waving hands towards the camera, heartwarming atmosphere, cinematic lighting", gen_type: "video" }
+    ]
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { id, topic, source, mode, scenes: customScenes, shorts_title: customTitle, apiKeys, ttsVoice, bgmTrack } = body;
 
-    const geminiApiKey = apiKeys?.geminiKey || process.env.GEMINI_API_KEY;
-    const openaiApiKey = apiKeys?.openaiKey || process.env.OPENAI_API_KEY;
+    const geminiApiKey = apiKeys?.geminiKey?.trim() || process.env.GEMINI_API_KEY;
+    const openaiApiKey = apiKeys?.openaiKey?.trim() || process.env.OPENAI_API_KEY;
 
     // -------------------------------------------------------------------------
     // [Step 2] Gemini API 대본 및 나노바나나2 프롬프트 파싱 (기존 semi_script 호환)
@@ -72,21 +138,16 @@ export async function POST(request: Request) {
             },
             isRealApi: true
           });
-        } catch (apiErr: any) { console.error("Gemini API Error, falling back to mock:", apiErr); }
+        } catch (apiErr: any) { console.error("Gemini API Error, falling back to smart mock:", apiErr); }
       }
 
-      // Gemini Fallback
+      // 🌟 [핵심 수정] Gemini Fallback 시 무조건 기초연금이 아닌, topic에 맞는 스마트 Fallback 반환!
+      const smartFallback = generateSmartFallback(topic);
       const mockScriptDraft = {
         id: id || Date.now(), topic: topic || "2026년 기초연금 인상안 확정",
-        shorts_title: "월 40만원 기초연금, 아직도 신청 안 하셨나요?",
+        shorts_title: smartFallback.shorts_title,
         created_at: new Date().toISOString().split('T')[0], status: "Script Generated",
-        scenes: [
-          { scene_id: 1, narration: "월 40만원 기초연금, 아직도 신청 안 하셨나요?", image_prompt: "A dignified elderly Korean couple holding a bankbook with happy smiles, modern living room, 8k resolution, photorealistic", gen_type: "video" },
-          { scene_id: 2, narration: "내년부터 수급 자격이 대폭 완화되어 더 많은 분들이 받습니다.", image_prompt: "A Korean senior woman talking on the phone with a community center, relieved expression, warm lighting", gen_type: "image" },
-          { scene_id: 3, narration: "단독가구 기준 월 소득 인정액이 250만원 이하면 가능해요.", image_prompt: "A clean graphic chart showing income criteria on a wooden table next to a coffee cup", gen_type: "image" },
-          { scene_id: 4, narration: "주민센터나 복지로 홈페이지에서 신분증만 있으면 즉시 신청!", image_prompt: "A Korean senior man walking happily towards a bright community center building, sunny day", gen_type: "image" },
-          { scene_id: 5, narration: "더 많은 시니어 꿀팁을 원하시면 구독과 좋아요 눌러주세요!", image_prompt: "A happy Korean elderly couple waving hands towards the camera, heartwarming atmosphere, cinematic lighting", gen_type: "video" }
-        ]
+        scenes: smartFallback.scenes
       };
       return NextResponse.json({ success: true, data: mockScriptDraft, isRealApi: false });
     }
@@ -201,20 +262,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, data: finalResult });
     }
 
-    // 완전 자동화 모드
+    // 🌟 [핵심 수정] 완전 자동화 모드에서도 스마트 Fallback 적용!
+    const smartFallback = generateSmartFallback(topic);
     const mockAutoResult = {
       id: id || Date.now(), topic: topic || "2026년 기초연금 인상안 확정",
-      shorts_title: "월 40만원 기초연금, 아직도 신청 안 하셨나요?",
+      shorts_title: smartFallback.shorts_title,
       created_at: new Date().toISOString().split('T')[0],
       upload_date: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
       status: "Anti-gravity AI Generated", bgm_track: "piano",
-      scenes: [
-        { scene_id: 1, narration: "월 40만원 기초연금, 아직도 신청 안 하셨나요?", image_prompt: "A dignified elderly Korean couple holding a bankbook with happy smiles", video_url: DEMO_MP4_URLS[0], audio_url: "/audio/sample1.mp3", final_engine: "Nano Banana 2 + Flow (Video)", tts_voice: "onyx" },
-        { scene_id: 2, narration: "내년부터 수급 자격이 대폭 완화되어 더 많은 분들이 받습니다.", image_prompt: "A Korean senior woman talking on the phone with a community center", video_url: SENIOR_IMAGE_URLS[1], audio_url: "/audio/sample2.mp3", final_engine: "Nano Banana 2 (Image)", tts_voice: "onyx" },
-        { scene_id: 3, narration: "단독가구 기준 월 소득 인정액이 250만원 이하면 가능해요.", image_prompt: "A clean graphic chart showing income criteria on a wooden table", video_url: SENIOR_IMAGE_URLS[2], audio_url: "/audio/sample3.mp3", final_engine: "Nano Banana 2 (Image)", tts_voice: "onyx" },
-        { scene_id: 4, narration: "주민센터나 복지로 홈페이지에서 신분증만 있으면 즉시 신청!", image_prompt: "A Korean senior man walking happily towards a bright community center building", video_url: SENIOR_IMAGE_URLS[3], audio_url: "/audio/sample4.mp3", final_engine: "Nano Banana 2 (Image)", tts_voice: "onyx" },
-        { scene_id: 5, narration: "더 많은 시니어 꿀팁을 원하시면 구독과 좋아요 눌러주세요!", image_prompt: "A happy Korean elderly couple waving hands towards the camera", video_url: DEMO_MP4_URLS[4], audio_url: "/audio/sample5.mp3", final_engine: "Nano Banana 2 + Flow (Video)", tts_voice: "onyx" }
-      ]
+      scenes: smartFallback.scenes.map((sc: any, idx: number) => ({
+        ...sc,
+        video_url: sc.gen_type === "video" ? DEMO_MP4_URLS[idx % 5] : SENIOR_IMAGE_URLS[idx % 5],
+        audio_url: `/audio/sample${(idx % 5) + 1}.mp3`,
+        final_engine: sc.gen_type === "video" ? "Nano Banana 2 + Flow (Video)" : "Nano Banana 2 (Image)",
+        tts_voice: "onyx"
+      }))
     };
     return NextResponse.json({ success: true, data: mockAutoResult });
 
