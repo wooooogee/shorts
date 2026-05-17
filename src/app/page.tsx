@@ -230,6 +230,8 @@ export default function Home() {
         if (!currentPrompt.includes("[이미지]")) currentPrompt = "[이미지] " + currentPrompt;
       }
       updatedScenes[index] = { ...updatedScenes[index], gen_type: value, image_prompt: currentPrompt };
+    } else if (field === "video_url") {
+      updatedScenes[index] = { ...updatedScenes[index], video_url: value, final_engine: "사용자 직접 교체 (Custom URL)" };
     } else {
       updatedScenes[index] = { ...updatedScenes[index], [field]: value };
     }
@@ -886,10 +888,71 @@ export default function Home() {
                               <label className="block text-xs font-bold text-slate-400 mb-1.5 flex items-center justify-between"><span>외부 AI 툴(Midjourney, Luma 등) 복사용 프롬프트 (한영 혼합)</span><span className="text-[10px] text-amber-400 font-mono">클릭하여 전체 복사 가능</span></label>
                               <textarea rows={8} value={sc.image_prompt} onChange={(e) => handleMasterSceneChange(idx, "image_prompt", e.target.value)} onClick={(e) => { (e.target as HTMLTextAreaElement).select(); navigator.clipboard.writeText(sc.image_prompt); alert(`Scene #${sc.scene_id} 프롬프트가 클립보드에 복사되었습니다!`); }} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-300 focus:border-amber-500 focus:outline-none resize-y leading-relaxed" placeholder="프롬프트가 생성됩니다..." />
                             </div>
+
+                            {/* 🌟 [요구사항 반영] 씬별 비주얼 소스 실시간 관리 및 직접 교체 (파일 업로드 & URL) */}
+                            <div className="pt-2 border-t border-slate-800/80 space-y-3">
+                              <label className="block text-xs font-bold text-slate-300 flex items-center gap-1.5"><Link className="w-3.5 h-3.5 text-amber-400" /><span>🖼️ 씬별 비주얼 소스 실시간 관리 및 직접 교체 (파일 업로드 & URL)</span></label>
+                              <div className="flex flex-col md:flex-row gap-4 items-center">
+                                <div className="w-full md:w-1/3 h-32 bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center relative group shrink-0">
+                                  {sc.video_url?.endsWith(".mp4") || sc.video_url?.startsWith("data:video") || sc.gen_type === "video" ? (
+                                    <video src={sc.video_url} className="w-full h-full object-cover" loop muted playsInline autoPlay />
+                                  ) : <img src={sc.video_url} alt={`Scene ${sc.scene_id}`} className="w-full h-full object-cover" />}
+                                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2 text-center text-[10px] text-white">{sc.final_engine || (sc.gen_type === "video" ? "🌊 Flow 비디오" : "🍌 Nano Banana")}</div>
+                                </div>
+                                <div className="w-full md:w-2/3 space-y-3">
+                                  <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5">
+                                    <label className="block text-xs font-bold text-amber-400 flex items-center gap-1.5"><Upload className="w-3.5 h-3.5" /><span>📁 내 컴퓨터 파일 선택 (업로드)</span></label>
+                                    <input type="file" accept="image/*,video/mp4" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleFileUpload(idx, file, true); }} className="w-full text-xs text-slate-300 file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-400 cursor-pointer" />
+                                    <span className="text-[10px] text-slate-500 block">.jpg, .png, .mp4 지원 (플로우, 나노바나나 등 즉시 반영)</span>
+                                  </div>
+
+                                  <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5">
+                                    <label className="block text-xs font-bold text-blue-400 flex items-center gap-1.5"><Link className="w-3.5 h-3.5" /><span>🌐 구글/캔바/비즈 이미지/영상 주소 붙여넣기</span></label>
+                                    <div className="flex items-center gap-1.5">
+                                      <input type="text" value={sc.video_url || ""} onChange={(e) => handleMasterSceneChange(idx, "video_url", e.target.value)} placeholder="https://..." className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-200 focus:border-blue-500 focus:outline-none" />
+                                      <button type="button" onClick={() => alert(`Scene #${sc.scene_id} 비주얼이 성공적으로 교체되었습니다!`)} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-lg border border-slate-700 shrink-0 shadow">적용</button>
+                                    </div>
+                                    <span className="text-[10px] text-slate-500 block">이미지/동영상 주소 복사(Copy image/video address) URL</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       );
                     })}
+                  </div>
+
+                  {/* 🌟 [요구사항 반영] 5단 씬 이어 붙여서 통합 미리보기 버튼 패널 */}
+                  <div className="p-5 bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-red-500/20 border border-amber-500/30 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 shadow-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 bg-gradient-to-tr from-amber-500 to-orange-500 rounded-2xl text-slate-950 shadow-lg shadow-amber-500/20 shrink-0">
+                        <Smartphone className="w-6 h-6 animate-pulse" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-100 flex items-center gap-2">
+                          <span>🎬 5단 씬 이어 붙여서 통합 미리보기 (재생 플레이어)</span>
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">플로우 & 나노바나나</span>
+                        </h4>
+                        <p className="text-xs text-slate-300 mt-0.5">업로드하거나 주소를 넣은 5개의 씬을 하나로 이어 붙여서 즉시 재생하고 싱크를 확인하세요.</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        setPreviewShorts({
+                          id: masterNewsItem.id || Date.now(),
+                          shorts_title: masterForm.shorts_title,
+                          topic: masterNewsItem.topic,
+                          scenes: masterForm.scenes,
+                          bgm_track: bgmTrack
+                        });
+                        setActiveSceneIndex(0);
+                        setIsPlaying(true);
+                      }}
+                      className="px-6 py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 text-xs font-bold rounded-2xl shadow-xl shadow-amber-500/20 hover:scale-105 transition-all shrink-0 flex items-center gap-2"
+                    >
+                      <Play className="w-5 h-5 fill-current" /><span>🎬 통합 미리보기 재생</span>
+                    </button>
                   </div>
 
                   {/* 🌟 2단계 핵심: Google Vids 및 CapCut 제작 추천 가이드 (정적 패널) */}
