@@ -9,14 +9,8 @@ import {
   Loader2, Pause, SkipBack, SkipForward, Smartphone, Search, ArrowRight, CheckSquare, Link, Upload, Volume2
 } from "lucide-react";
 
-// 초기 뉴스 큐레이션 데이터
-const initialNews = [
-  { id: 1, topic: "2026년 기초연금 40만원 인상안 확정 및 수급자격 완화", source: "보건복지부 정책브리핑 (2026.05.15)", status: "Ready", date: "2026-05-16", summary: "보건복지부가 2026년부터 기초연금을 기존 33만원에서 40만원으로 인상하고, 단독가구 기준 월 소득 인정액을 250만원 이하로 완화하는 방안을 확정했습니다." },
-  { id: 2, topic: "65세 이상 임플란트 4개까지 건강보험 확대 적용", source: "대한민국 정책포털 뉴스", status: "Ready", date: "2026-05-16", summary: "기존 2개까지만 적용되던 65세 이상 어르신 임플란트 건강보험 혜택이 올해 하반기부터 최대 4개까지 본인부담금 30%로 확대 적용됩니다." },
-  { id: 3, topic: "노인일자리 월 100만원 수당 '시니어 인턴십' 대규모 모집", source: "한국노인인력개발원 공고", status: "Ready", date: "2026-05-15", summary: "월 100만원 이상의 급여를 보장하는 보건복지부 주관 '시니어 인턴십' 프로그램이 전국 3천 개 기업을 대상으로 대규모 참여자 모집을 시작했습니다." },
-  { id: 4, topic: "어르신 교통비 무료 패스카드 전국 통합 발급 안내", source: "국토교통부 보도자료", status: "Done", date: "2026-05-14", summary: "지자체별로 달랐던 어르신 무임승차 카드가 '전국 시니어 패스' 하나로 통합되어 전국 지하철 및 시내버스를 무료로 이용할 수 있게 됩니다." },
-  { id: 5, topic: "독감 및 대상포진 백신 무료 접종 지정병원 5천곳 확대", source: "질병관리청 공지", status: "Done", date: "2026-05-13", summary: "고가의 대상포진 백신과 독감 백신을 무료로 접종받을 수 있는 국가 지정 동네 병의원이 전국 5천 곳으로 대폭 확대되었습니다." },
-];
+// 초기 뉴스 큐레이션 데이터 (사용자 요청에 따라 테스트용 내용 모두 삭제 및 빈 배열로 초기화)
+const initialNews: any[] = [];
 
 // 구글 공용 데모 MP4 URL 목록
 const DEMO_MP4_URLS = [
@@ -36,23 +30,8 @@ const SENIOR_IMAGE_URLS = [
   "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80"
 ];
 
-// 초기 대시보드 데이터
-const initialDashboard = [
-  {
-    id: 101,
-    topic: "어르신 교통비 무료 패스카드 전국 통합 발급 안내",
-    shorts_title: "교통비 0원! 전국 지하철·버스 무료 패스 신청법",
-    created_at: "2026-05-14", upload_date: "2026-05-16", status: "Anti-gravity AI Generated",
-    views: "14.2K", likes: "1.8K", bgm_track: "piano",
-    scenes: [
-      { scene_id: 1, narration: "교통비 0원! 전국 지하철·버스 무료 패스 신청법", image_prompt: "A dignified elderly Korean man holding a transport card with a big smile", video_url: DEMO_MP4_URLS[0], audio_url: "/audio/sample1.mp3", final_engine: "Nano Banana 2 + Flow (Video)", tts_voice: "onyx" },
-      { scene_id: 2, narration: "기존 지자체별 카드가 하나로 통합되어 전국 어디서나 무료!", image_prompt: "A modern smart card shining on a sleek map of Korea", video_url: SENIOR_IMAGE_URLS[1], audio_url: "/audio/sample2.mp3", final_engine: "Nano Banana 2 (Image)", tts_voice: "onyx" },
-      { scene_id: 3, narration: "만 65세 이상 어르신이라면 누구나 혜택을 누릴 수 있습니다.", image_prompt: "A group of happy Korean seniors boarding a clean modern bus", video_url: SENIOR_IMAGE_URLS[2], audio_url: "/audio/sample3.mp3", final_engine: "Nano Banana 2 (Image)", tts_voice: "onyx" },
-      { scene_id: 4, narration: "가까운 농협이나 신한은행에서 신분증만 내면 즉시 발급!", image_prompt: "A senior woman kindly guided by a bank clerk, bright bank interior", video_url: SENIOR_IMAGE_URLS[3], audio_url: "/audio/sample4.mp3", final_engine: "Nano Banana 2 (Image)", tts_voice: "onyx" },
-      { scene_id: 5, narration: "돈 버는 시니어 복지 꿀팁, 지금 바로 구독하고 받아보세요!", image_prompt: "A happy Korean elderly couple waving hands, warm cinematic lighting", video_url: DEMO_MP4_URLS[4], audio_url: "/audio/sample5.mp3", final_engine: "Nano Banana 2 + Flow (Video)", tts_voice: "onyx" }
-    ]
-  }
-];
+// 초기 대시보드 데이터 (사용자 요청에 따라 테스트용 내용 모두 삭제 및 빈 배열로 초기화)
+const initialDashboard: any[] = [];
 
 export default function Home() {
   const [newsList, setNewsList] = useState(initialNews);
@@ -520,7 +499,7 @@ export default function Home() {
                   {isSearchingNews ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                   <span>{isSearchingNews ? "AI 최신 뉴스 크롤링 중..." : "🔍 AI 최신 시니어 뉴스 서치 (자동 크롤링)"}</span>
                 </button>
-                <button onClick={() => setNewsList(initialNews)} className="flex items-center gap-2 text-xs text-slate-400 hover:text-slate-200 bg-slate-800 px-3 py-2.5 rounded-xl border border-slate-700">
+                <button onClick={() => { setNewsList([]); setDashboardList([]); alert("시트 및 대시보드의 모든 내용이 초기화되었습니다."); }} className="flex items-center gap-2 text-xs text-slate-400 hover:text-slate-200 bg-slate-800 px-3 py-2.5 rounded-xl border border-slate-700">
                   <RefreshCw className="w-3.5 h-3.5" /><span>시트 초기화</span>
                 </button>
               </div>
