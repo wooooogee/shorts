@@ -198,8 +198,11 @@ export default function Home() {
       if (data.success) {
         setMasterForm((prev: any) => ({ ...prev, scenes: data.data.scenes }));
         setCurrentStep(3);
+        if (!data.isRealApi) {
+          alert(`⚠️ AI 비주얼 생성 안내 ⚠️\n\n${data.message || "OpenAI API 키가 없거나 할당량 초과로 인해 고품질 시니어 스톡 폴백 데이터가 적용되었습니다."}\n\n[🔑 API 키 및 연동 설정] 탭에서 유효한 OpenAI API 키를 입력하시면 100% 실사 AI 비주얼이 즉시 생성됩니다.`);
+        }
       }
-    } catch (err) { console.error("Step 3 API Error:", err); }
+    } catch (err) { console.error("Step 3 API Error:", err); alert("비주얼 합성 API 호출 중 오류가 발생했습니다."); }
     finally { setIsStepLoading(false); }
   };
 

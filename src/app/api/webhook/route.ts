@@ -158,40 +158,70 @@ export async function POST(request: Request) {
     if (mode === "step3_visual") {
       let visualScenes = customScenes;
       let isRealImage = false;
+      let errorMessage = "";
 
       if (openaiApiKey) {
         try {
           const openai = new OpenAI({ apiKey: openaiApiKey });
-          const firstScene = customScenes[0];
-          const imageResponse = await openai.images.generate({
-            model: "dall-e-3",
-            prompt: `${firstScene.image_prompt}, realistic Korean elderly, warm and bright natural lighting, highly detailed skin texture, photorealistic, cinematic shot, no text, 9:16 aspect ratio`,
-            n: 1, size: "1024x1792",
-          });
-          const realImageUrl = imageResponse?.data?.[0]?.url;
-          if (realImageUrl) isRealImage = true;
+          
+          // 🌟 [핵심 개선] 1번 씬만 생성하는 것이 아니라, gen_type이 image이거나 video_url이 없는 모든 씬에 대해 동시 생성!
+          visualScenes = await Promise.all(customScenes.map(async (sc: any, idx: number) => {
+            // 이미 사용자가 직접 올린 URL이 있으면 보호
+            if (sc.video_url && sc.final_engine?.includes("사용자")) {
+              return sc;
+            }
+            
+            try {
+              const imageResponse = await openai.images.generate({
+                model: "dall-e-3",
+                prompt: `${sc.image_prompt || sc.narration}, realistic Korean elderly, warm and bright natural lighting, highly detailed skin texture, photorealistic, cinematic shot, no text, 9:16 aspect ratio`,
+                n: 1, size: "1024x1792",
+              });
+              const realImageUrl = imageResponse?.data?.[0]?.url;
+              if (realImageUrl) {
+                isRealImage = true;
+                return {
+                  ...sc,
+                  video_url: realImageUrl,
+                  isRealGen: true,
+                  final_engine: sc.gen_type === "video" ? "Nano Banana 2 + Flow (Video AI)" : "Nano Banana 2 (Image AI)"
+                };
+              }
+            } catch (imgErr: any) {
+              console.error(`Scene #${idx + 1} DALL-E 3 Error:`, imgErr.message);
+              errorMessage = imgErr.message;
+            }
 
-          visualScenes = customScenes.map((sc: any, idx: number) => ({
-            ...sc,
-            video_url: sc.video_url || (idx === 0 ? realImageUrl : (sc.gen_type === "video" ? DEMO_MP4_URLS[idx % 5] : SENIOR_IMAGE_URLS[idx % 5])),
-            isRealGen: idx === 0 ? true : false,
-            final_engine: sc.video_url ? sc.final_engine || "사용자 직접 교체 (Custom URL)" : (sc.gen_type === "video" ? "Nano Banana 2 + Flow (Video)" : "Nano Banana 2 (Image)")
+            // 실패 시 폴백
+            return {
+              ...sc,
+              video_url: sc.video_url || (sc.gen_type === "video" ? DEMO_MP4_URLS[idx % 5] : SENIOR_IMAGE_URLS[idx % 5]),
+              isRealGen: false,
+              final_engine: sc.gen_type === "video" ? "Nano Banana 2 + Flow (Video Fallback)" : "Nano Banana 2 (Image Fallback)"
+            };
           }));
-        } catch (apiErr: any) { console.error("OpenAI DALL-E 3 Error, falling back to mock:", apiErr); }
+
+        } catch (apiErr: any) { 
+          console.error("OpenAI DALL-E 3 API Init Error:", apiErr); 
+          errorMessage = apiErr.message;
+        }
+      } else {
+        errorMessage = "OpenAI API 키가 설정되지 않았습니다. (설정 탭에서 키를 입력하거나 .env를 확인하세요)";
       }
 
       if (!isRealImage) {
         visualScenes = customScenes.map((sc: any, idx: number) => ({
           ...sc,
           video_url: sc.video_url || (sc.gen_type === "video" ? DEMO_MP4_URLS[idx % 5] : SENIOR_IMAGE_URLS[idx % 5]),
-          final_engine: sc.video_url ? sc.final_engine || "사용자 직접 교체 (Custom URL)" : (sc.gen_type === "video" ? "Nano Banana 2 + Flow (Video)" : "Nano Banana 2 (Image)")
+          final_engine: sc.video_url ? sc.final_engine || "사용자 직접 교체 (Custom URL)" : (sc.gen_type === "video" ? "Nano Banana 2 + Flow (Video Fallback)" : "Nano Banana 2 (Image Fallback)")
         }));
       }
 
       return NextResponse.json({ 
         success: true, 
         data: { id, topic, shorts_title: customTitle, scenes: visualScenes, status: "Visual Synthesized" },
-        isRealApi: isRealImage 
+        isRealApi: isRealImage,
+        message: isRealImage ? "AI 비주얼 합성이 성공적으로 완료되었습니다." : `AI 생성 폴백 가동 (사유: ${errorMessage})`
       });
     }
 
