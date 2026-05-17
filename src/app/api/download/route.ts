@@ -23,7 +23,7 @@ export async function GET(request: Request) {
         const base64Data = matches[2];
         buffer = Buffer.from(base64Data, 'base64');
 
-        return new NextResponse(buffer, {
+        return new NextResponse(buffer as any, {
           headers: {
             'Content-Disposition': `attachment; filename="${filename}"`,
             'Content-Type': matches[1] || 'application/octet-stream',
@@ -46,7 +46,7 @@ export async function GET(request: Request) {
 
       const contentType = response.headers.get('content-type') || 'application/octet-stream';
 
-      return new NextResponse(buffer, {
+      return new NextResponse(buffer as any, {
         headers: {
           'Content-Disposition': `attachment; filename="${filename}"`,
           'Content-Type': contentType,
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
       const ext = path.extname(filename).toLowerCase();
       const contentType = ext === '.mp3' ? 'audio/mp3' : ext === '.mp4' ? 'video/mp4' : 'application/octet-stream';
 
-      return new NextResponse(buffer, {
+      return new NextResponse(buffer as any, {
         headers: {
           'Content-Disposition': `attachment; filename="${filename}"`,
           'Content-Type': contentType,
@@ -85,7 +85,7 @@ export async function GET(request: Request) {
     buffer = Buffer.from(dummyContent, 'utf-8');
     const contentType = isAudio ? 'audio/mp3' : 'video/mp4';
 
-    return new NextResponse(buffer, {
+    return new NextResponse(buffer as any, {
       headers: {
         'Content-Disposition': `attachment; filename="${filename}"`,
         'Content-Type': contentType,
@@ -100,7 +100,7 @@ export async function GET(request: Request) {
     const isAudio = filename.endsWith('.mp3');
     const dummyBuffer = Buffer.from('Fallback Dummy Buffer due to Proxy Error', 'utf-8');
     
-    return new NextResponse(dummyBuffer, {
+    return new NextResponse(dummyBuffer as any, {
       headers: {
         'Content-Disposition': `attachment; filename="${filename}"`,
         'Content-Type': isAudio ? 'audio/mp3' : 'video/mp4',
