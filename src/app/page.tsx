@@ -317,6 +317,40 @@ export default function Home() {
     }
   };
 
+  // 🌟 [요구사항 5 반영] 캡컷(CapCut) 최종 편집 및 싱크 완벽 연동용 자막(.srt) 파일 즉석 생성 및 다운로드 핸들러
+  const handleDownloadSRT = (item: any) => {
+    let srtContent = "";
+    let currentTime = 0; // ms 단위
+    
+    item.scenes.forEach((sc: any, idx: number) => {
+      const sceneNum = idx + 1;
+      const duration = sc.gen_type === "video" ? 4000 : 3500; // 비디오 4초, 이미지 3.5초 기준
+      const startTime = currentTime;
+      const endTime = currentTime + duration;
+      
+      const formatTime = (ms: number) => {
+        const totalSec = Math.floor(ms / 1000);
+        const hours = Math.floor(totalSec / 3600);
+        const mins = Math.floor((totalSec % 3600) / 60);
+        const secs = totalSec % 60;
+        const millis = ms % 1000;
+        return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')},${String(millis).padStart(3, '0')}`;
+      };
+
+      srtContent += `${sceneNum}\n${formatTime(startTime)} --> ${formatTime(endTime)}\n${sc.narration}\n\n`;
+      currentTime = endTime;
+    });
+
+    const blob = new Blob([srtContent], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Shorts_${item.id}_Subtitles.srt`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    alert("📜 캡컷 연동용 완벽 자막 파일(.srt)이 성공적으로 다운로드되었습니다!\n캡컷에 영상 소스와 함께 넣으면 싱크가 100% 자동 완성됩니다.");
+  };
+
   const [selectedShorts, setSelectedShorts] = useState<any>(null);
 
   return (
@@ -602,6 +636,13 @@ export default function Home() {
                         <Download className="w-4 h-4" />
                         <span>{downloadingId === item.id ? "다운로드 중..." : "소스 일괄 다운로드 (.mp4 + .mp3)"}</span>
                       </button>
+
+                      <button 
+                        onClick={() => handleDownloadSRT(item)} 
+                        className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-500/20 hover:scale-105"
+                      >
+                        <FileText className="w-4 h-4" /><span>📜 자막(.srt) 파일 다운로드</span>
+                      </button>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
@@ -721,50 +762,98 @@ export default function Home() {
               <button onClick={() => setIsMasterStudioOpen(false)} className="text-xs text-slate-400 hover:text-slate-200 bg-slate-800 p-2.5 rounded-xl border border-slate-700">닫기</button>
             </div>
 
-            {/* 🌟 5단계 화려한 프로그레스 바 네비게이션 */}
-            <div className="mb-8 bg-slate-950 p-4 rounded-2xl border border-slate-800/80 shadow-inner">
-              <div className="grid grid-cols-5 gap-2 text-center relative">
+            {/* 🌟 5단계 화려한 프로그레스 바 네비게이션 (요구사항 4 반영: 실시간 체크마크 및 로딩 바) */}
+            <div className="mb-8 bg-slate-950 p-5 rounded-2xl border border-slate-800/80 shadow-inner">
+              <div className="grid grid-cols-5 gap-2 text-center relative mb-4">
                 
                 <div className={`p-3 rounded-xl border flex flex-col items-center justify-center transition-all ${currentStep === 1 ? "bg-amber-500/20 border-amber-500 text-amber-300 shadow-lg shadow-amber-500/10" : currentStep > 1 ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-slate-900/50 border-slate-800 text-slate-500"}`}>
-                  <div className="flex items-center gap-1.5 mb-1"><Search className="w-4 h-4" /><span className="text-xs font-bold">Step 1. 자료 서치</span></div>
-                  <span className="text-[10px] opacity-80 line-clamp-1">팩트 검증 및 큐레이션</span>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    {currentStep > 1 ? <CheckCircle2 className="w-4 h-4 text-emerald-400 animate-bounce" /> : <Search className="w-4 h-4" />}
+                    <span className="text-xs font-bold">Step 1. 자료 서치</span>
+                  </div>
+                  <span className="text-[10px] opacity-80 line-clamp-1">{currentStep > 1 ? "✅ 팩트 검증 완료" : "팩트 검증 및 큐레이션"}</span>
                 </div>
 
                 <div className={`p-3 rounded-xl border flex flex-col items-center justify-center transition-all ${currentStep === 2 ? "bg-amber-500/20 border-amber-500 text-amber-300 shadow-lg shadow-amber-500/10" : currentStep > 2 ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-slate-900/50 border-slate-800 text-slate-500"}`}>
-                  <div className="flex items-center gap-1.5 mb-1"><Bot className="w-4 h-4" /><span className="text-xs font-bold">Step 2. 대본 & 프롬프트</span></div>
-                  <span className="text-[10px] opacity-80 line-clamp-1">Gemini AI 5단 파싱</span>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    {currentStep > 2 ? <CheckCircle2 className="w-4 h-4 text-emerald-400 animate-bounce" /> : <Bot className="w-4 h-4" />}
+                    <span className="text-xs font-bold">Step 2. 대본 & 프롬프트</span>
+                  </div>
+                  <span className="text-[10px] opacity-80 line-clamp-1">{currentStep > 2 ? "✅ 인간 검수 완료" : "Gemini AI 5단 파싱"}</span>
                 </div>
 
                 <div className={`p-3 rounded-xl border flex flex-col items-center justify-center transition-all ${currentStep === 3 ? "bg-amber-500/20 border-amber-500 text-amber-300 shadow-lg shadow-amber-500/10" : currentStep > 3 ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-slate-900/50 border-slate-800 text-slate-500"}`}>
-                  <div className="flex items-center gap-1.5 mb-1"><ImageIcon className="w-4 h-4" /><span className="text-xs font-bold">Step 3. 비주얼 합성</span></div>
-                  <span className="text-[10px] opacity-80 line-clamp-1">Nano Banana & Flow</span>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    {currentStep > 3 ? <CheckCircle2 className="w-4 h-4 text-emerald-400 animate-bounce" /> : <ImageIcon className="w-4 h-4" />}
+                    <span className="text-xs font-bold">Step 3. 비주얼 합성</span>
+                  </div>
+                  <span className="text-[10px] opacity-80 line-clamp-1">{currentStep > 3 ? "✅ 시니어 룩 합성 완료" : "Nano Banana & Flow"}</span>
                 </div>
 
                 <div className={`p-3 rounded-xl border flex flex-col items-center justify-center transition-all ${currentStep === 4 ? "bg-amber-500/20 border-amber-500 text-amber-300 shadow-lg shadow-amber-500/10" : currentStep > 4 ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-slate-900/50 border-slate-800 text-slate-500"}`}>
-                  <div className="flex items-center gap-1.5 mb-1"><Music className="w-4 h-4" /><span className="text-xs font-bold">Step 4. 자막 & 오디오</span></div>
-                  <span className="text-[10px] opacity-80 line-clamp-1">AI 성우 및 BGM 설정</span>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    {currentStep > 4 ? <CheckCircle2 className="w-4 h-4 text-emerald-400 animate-bounce" /> : <Music className="w-4 h-4" />}
+                    <span className="text-xs font-bold">Step 4. 자막 & 오디오</span>
+                  </div>
+                  <span className="text-[10px] opacity-80 line-clamp-1">{currentStep > 4 ? "✅ Wavenet 오디오 완료" : "AI 성우 및 BGM 설정"}</span>
                 </div>
 
                 <div className={`p-3 rounded-xl border flex flex-col items-center justify-center transition-all ${currentStep === 5 ? "bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-lg shadow-emerald-500/10" : "bg-slate-900/50 border-slate-800 text-slate-500"}`}>
                   <div className="flex items-center gap-1.5 mb-1"><CheckCircle2 className="w-4 h-4" /><span className="text-xs font-bold">Step 5. 최종 완료</span></div>
-                  <span className="text-[10px] opacity-80 line-clamp-1">대시보드 등록 & 다운로드</span>
+                  <span className="text-[10px] opacity-80 line-clamp-1">{currentStep === 5 ? "✅ 패키징 완료" : "대시보드 등록 & 다운로드"}</span>
                 </div>
 
+              </div>
+
+              {/* 실시간 프로그레스 바 */}
+              <div className="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                <div 
+                  className="bg-gradient-to-r from-amber-500 via-blue-500 to-emerald-500 h-full transition-all duration-700 ease-out" 
+                  style={{ width: `${(currentStep / 5) * 100}%` }}
+                />
               </div>
             </div>
 
             {/* 메인 콘텐츠 영역 (현재 단계별 뷰 렌더링) */}
             <div className="flex-1 overflow-y-auto pr-2 mb-6">
               {isStepLoading ? (
-                <div className="flex flex-col items-center justify-center py-24 text-center">
-                  <Loader2 className="w-12 h-12 text-amber-400 animate-spin mb-4" />
-                  <h4 className="text-base font-bold text-slate-200 mb-1">
+                <div className="flex flex-col items-center justify-center py-20 px-6 text-center animate-fadeIn">
+                  <div className="relative mb-6">
+                    <div className="w-16 h-16 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin" />
+                    <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-amber-400">{currentStep}/5</div>
+                  </div>
+                  <h4 className="text-lg font-bold text-slate-100 mb-2">
                     {currentStep === 1 && "구글 Gemini 1.5 Flash에 대본 및 프롬프트 파싱을 요청 중입니다..."}
                     {currentStep === 2 && "나노바나나2 노드 및 플로우 AI 비주얼 합성을 가동 중입니다..."}
                     {currentStep === 3 && "OpenAI AI 성우 오디오(TTS) 및 하단 자막 파싱을 진행 중입니다..."}
                     {currentStep === 4 && "최종 소스 패키징 및 대시보드 데이터베이스 등록 중입니다..."}
                   </h4>
-                  <p className="text-xs text-slate-400">안티그래비티 워크플로우 엔진이 백엔드에서 안전하게 통신하고 있습니다.</p>
+                  <p className="text-xs text-slate-400 mb-6 max-w-md leading-relaxed">
+                    나노바나나로 이미지 뽑고, 플로우(Flow)로 비디오 변환하고, TTS 굽는 데는 최소 30초에서 2분 이상의 시간이 소요됩니다. 비동기 렌더링이 안전하게 진행 중이므로 창을 닫거나 새로고침하지 마세요.
+                  </p>
+
+                  <div className="w-full max-w-md bg-slate-950 p-4 rounded-2xl border border-slate-800 text-left space-y-2.5">
+                    <div className="text-xs font-bold text-slate-300 flex items-center justify-between border-b border-slate-800/80 pb-2">
+                      <span>🔄 실시간 백엔드 렌더링 체크리스트</span>
+                      <span className="text-amber-400 animate-pulse">처리 중...</span>
+                    </div>
+                    <div className="flex items-center gap-2.5 text-xs text-slate-300 font-medium pt-1">
+                      {currentStep > 1 ? <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 animate-bounce" /> : <Loader2 className="w-4 h-4 text-amber-400 animate-spin shrink-0" />}
+                      <span>1. 뉴스 팩트 큐레이션 및 구조 분석 {currentStep > 1 ? "(완료)" : "(진행 중)"}</span>
+                    </div>
+                    <div className="flex items-center gap-2.5 text-xs text-slate-300 font-medium">
+                      {currentStep > 2 ? <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 animate-bounce" /> : (currentStep === 2 ? <Loader2 className="w-4 h-4 text-amber-400 animate-spin shrink-0" /> : <span className="w-4 h-4 rounded-full border border-slate-700 shrink-0" />)}
+                      <span>2. 8K 실사 시니어 룩(Look) 프롬프트 바인딩 {currentStep > 2 ? "(완료)" : (currentStep === 2 ? "(생성 중)" : "(대기 중)")}</span>
+                    </div>
+                    <div className="flex items-center gap-2.5 text-xs text-slate-300 font-medium">
+                      {currentStep > 3 ? <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 animate-bounce" /> : (currentStep === 3 ? <Loader2 className="w-4 h-4 text-amber-400 animate-spin shrink-0" /> : <span className="w-4 h-4 rounded-full border border-slate-700 shrink-0" />)}
+                      <span>3. Wavenet 오디오 합성 및 속도/피치 최적화 {currentStep > 3 ? "(완료)" : (currentStep === 3 ? "(합성 중)" : "(대기 중)")}</span>
+                    </div>
+                    <div className="flex items-center gap-2.5 text-xs text-slate-300 font-medium">
+                      {currentStep > 4 ? <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 animate-bounce" /> : (currentStep === 4 ? <Loader2 className="w-4 h-4 text-amber-400 animate-spin shrink-0" /> : <span className="w-4 h-4 rounded-full border border-slate-700 shrink-0" />)}
+                      <span>4. 소스 패키지 조립 및 캡컷 연동용 자막(.srt) 준비 {currentStep > 4 ? "(완료)" : (currentStep === 4 ? "(패키징 중)" : "(대기 중)")}</span>
+                    </div>
+                  </div>
                 </div>
               ) : currentStep === 1 ? (
                 // Step 1 뷰
@@ -779,8 +868,18 @@ export default function Home() {
                   </div>
                 </div>
               ) : currentStep === 2 ? (
-                // Step 2 뷰
+                // 🌟 [요구사항 1 반영] Step 2 뷰: 대본 검수 및 '수정 피드백' 노드 (Human-in-the-loop)
                 <div className="space-y-6 animate-fadeIn">
+                  <div className="p-4 bg-gradient-to-r from-blue-600/20 to-indigo-600/20 border border-blue-500/30 rounded-2xl flex items-start gap-3">
+                    <UserCheck className="w-5 h-5 text-blue-400 shrink-0 mt-0.5 animate-pulse" />
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-100 mb-1">✍️ 인간-AI 협업 대본 검수 모드 (Human-in-the-loop) 가동 중</h4>
+                      <p className="text-[11px] text-slate-300 leading-relaxed">
+                        AI가 완벽하더라도 가끔 단어나 뉘앙스가 시니어 정서에 안 맞을 수 있습니다. 아래 생성된 JSON 기반의 5단 대본과 프롬프트를 눈으로 직접 읽어보시고, 어색한 자막이나 텍스트를 화면에서 <strong>직접 수정하신 뒤 하단의 [검수 완료 및 생성 시작] 버튼</strong>을 누르세요. 토큰을 아끼고 불량 영상을 필터링하는 최고의 방법입니다.
+                      </p>
+                    </div>
+                  </div>
+
                   <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5">
                     <label className="block text-xs font-bold text-amber-400 mb-2 flex items-center justify-between"><span>📌 유튜브 쇼츠 업로드용 훅 제목</span><span className="text-slate-500 font-normal">어그로 및 팩트 요약</span></label>
                     <input type="text" value={masterForm.shorts_title} onChange={(e) => setMasterForm({ ...masterForm, shorts_title: e.target.value })} className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm font-bold text-slate-100 focus:border-amber-500 focus:outline-none" />
@@ -882,24 +981,29 @@ export default function Home() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       
-                      {/* 1. 성우 목소리 선택 패널 */}
+                      {/* 1. 성우 목소리 선택 패널 (요구사항 2 반영: Wavenet 감정/속도/피치 바인딩) */}
                       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
-                        <h5 className="text-xs font-bold text-slate-200 flex items-center gap-1.5 border-b border-slate-800 pb-3">
-                          <Bot className="w-4 h-4 text-amber-400" /><span>🎙️ AI 성우 목소리 톤 선택 (OpenAI TTS)</span>
-                        </h5>
+                        <div className="border-b border-slate-800 pb-3">
+                          <h5 className="text-xs font-bold text-slate-200 flex items-center gap-1.5 mb-1">
+                            <Bot className="w-4 h-4 text-amber-400" /><span>🎙️ 한국어 시니어 타깃 최적화 Wavenet 오디오 설정</span>
+                          </h5>
+                          <p className="text-[11px] text-slate-400 leading-relaxed">
+                            Wavenet 목소리가 너무 기계처럼 느껴지거나 빠르면 시니어들이 이탈합니다. AI 티를 지우기 위해 <strong>말하기 속도(speakingRate)를 0.85로 낮추고, 음높이(pitch)를 -1.5 중저음</strong>으로 고정 바인딩하여 반 박자 느리고 신뢰감 있는 오디오를 생성합니다.
+                          </p>
+                        </div>
                         <div className="grid grid-cols-2 gap-3 pt-1">
                           {[
-                            { id: "onyx", label: "👨‍🦳 Onyx (중후하고 신뢰감 있는 남성)", desc: "뉴스, 정책 전달에 최적" },
-                            { id: "alloy", label: "👩‍🦰 Alloy (따뜻하고 친근한 여성)", desc: "복지 혜택, 꿀팁 설명용" },
-                            { id: "shimmer", label: "✨ Shimmer (밝고 낭랑한 여성 목소리)", desc: "활기찬 시니어 라이프" },
-                            { id: "echo", label: "👨‍💼 Echo (차분하고 묵직한 남성 톤)", desc: "진중한 건강 정보 전달" }
+                            { id: "onyx", label: "👨‍🦳 ko-KR-Wavenet-C (차분하고 신뢰감 있는 남성)", desc: "속도 0.85x / 피치 -1.5 중저음" },
+                            { id: "alloy", label: "👩‍🦰 ko-KR-Wavenet-D (부드럽고 따뜻한 여성)", desc: "속도 0.85x / 피치 -1.5 중저음" },
+                            { id: "shimmer", label: "✨ Shimmer (밝고 낭랑한 여성 목소리)", desc: "속도 0.90x / 피치 -1.0 차분함" },
+                            { id: "echo", label: "👨‍💼 Echo (묵직하고 진중한 남성 톤)", desc: "속도 0.85x / 피치 -2.0 극저음" }
                           ].map((voice) => (
                             <label key={voice.id} className={`p-3.5 rounded-xl border flex flex-col justify-between cursor-pointer transition-all ${ttsVoice === voice.id ? "bg-amber-500/10 border-amber-500 shadow-md" : "bg-slate-950 border-slate-800 hover:border-slate-700"}`}>
                               <div className="flex items-center justify-between mb-2">
                                 <span className="text-xs font-bold text-slate-200">{voice.label}</span>
                                 <input type="radio" name="ttsVoice" value={voice.id} checked={ttsVoice === voice.id} onChange={(e) => setTtsVoice(e.target.value)} className="text-amber-500 focus:ring-amber-500 bg-slate-900 border-slate-700" />
                               </div>
-                              <span className="text-[10px] text-slate-400 block">{voice.desc}</span>
+                              <span className="text-[10px] text-amber-400/90 font-mono block">{voice.desc}</span>
                             </label>
                           ))}
                         </div>
@@ -968,10 +1072,36 @@ export default function Home() {
                   </div>
                 </div>
               ) : (
-                // Step 5 뷰
-                <div className="py-16 text-center space-y-6 animate-fadeIn">
+                // Step 5 뷰 (요구사항 5 반영: 자막 .srt 파일 다운로드 버튼 신설)
+                <div className="py-12 text-center space-y-6 animate-fadeIn">
                   <div className="w-16 h-16 bg-emerald-500/20 border border-emerald-500 text-emerald-400 rounded-full flex items-center justify-center mx-auto animate-bounce"><CheckCircle2 className="w-8 h-8" /></div>
-                  <div className="space-y-2"><h4 className="text-xl font-bold text-slate-100">🎉 5단계 프로덕션 파이프라인 가동 완료!</h4><p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">자료 서치부터 대본, 이미지, 영상, 자막, 성우 및 BGM까지 모든 소스 패키지가 완벽하게 조립되어 대시보드(탭 2)에 성공적으로 등록되었습니다.</p></div>
+                  <div className="space-y-2">
+                    <h4 className="text-xl font-bold text-slate-100">🎉 5단계 프로덕션 파이프라인 가동 완료!</h4>
+                    <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">자료 서치부터 대본, 이미지, 영상, 자막, 성우 및 BGM까지 모든 소스 패키지가 완벽하게 조립되어 대시보드(탭 2)에 성공적으로 등록되었습니다.</p>
+                  </div>
+                  
+                  <div className="p-5 bg-slate-900 border border-slate-800 rounded-2xl max-w-lg mx-auto space-y-4 text-left">
+                    <h5 className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4" /><span>💡 캡컷(CapCut) 최종 편집 및 자막 싱크 100% 자동 완성 꿀팁</span>
+                    </h5>
+                    <p className="text-[11px] text-slate-300 leading-relaxed">
+                      웹에서 무리하게 완벽한 인코딩을 하려다 서버가 멈추는 것보다, 소스를 내려받아 캡컷으로 최종 마무리하는 것이 훨씬 안정적이고 전문적입니다. 아래 <strong>[📜 자막(.srt) 파일 다운로드]</strong> 버튼을 누르면 각 씬의 타임코드가 계산된 완벽한 자막 파일이 생성됩니다. 캡컷에 영상과 함께 넣으면 싱크가 1초 만에 자동 완성됩니다!
+                    </p>
+                    <div className="flex flex-wrap gap-3 pt-1">
+                      <button 
+                        onClick={() => handleDownloadSRT(masterForm)} 
+                        className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-5 py-3 rounded-xl text-xs font-bold shadow-lg shadow-emerald-500/20 hover:scale-105 transition-all"
+                      >
+                        <FileText className="w-4 h-4" /><span>📜 캡컷 연동용 자막(.srt) 파일 다운로드</span>
+                      </button>
+                      <button 
+                        onClick={() => handleDownloadPackage(masterForm)} 
+                        className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 px-5 py-3 rounded-xl text-xs font-bold shadow-lg shadow-amber-500/20 hover:scale-105 transition-all"
+                      >
+                        <Download className="w-4 h-4" /><span>소스 일괄 다운로드 (.mp4 + .mp3)</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -989,7 +1119,7 @@ export default function Home() {
               )}
               {!isStepLoading && currentStep === 2 && (
                 <button onClick={handleExecuteStep3} className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3.5 rounded-xl text-xs font-bold shadow-lg shadow-blue-500/20 hover:scale-105">
-                  <span>➡️ 3단계: AI 비주얼 (이미지/영상) 합성 실행</span><ArrowRight className="w-4 h-4" />
+                  <UserCheck className="w-4 h-4 animate-bounce" /><span>✍️ 대본/프롬프트 인간 검수 완료 (Human-in-the-loop) ➡️ 3단계 비주얼 합성 시작</span><ArrowRight className="w-4 h-4" />
                 </button>
               )}
               {!isStepLoading && currentStep === 3 && (

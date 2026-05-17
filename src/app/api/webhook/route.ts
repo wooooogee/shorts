@@ -165,7 +165,7 @@ export async function POST(request: Request) {
           const firstScene = customScenes[0];
           const imageResponse = await openai.images.generate({
             model: "dall-e-3",
-            prompt: `${firstScene.image_prompt}, a friendly and dignified Korean senior person, realistic photorealistic style, 8k resolution, warm cinematic lighting --ar 9:16`,
+            prompt: `${firstScene.image_prompt}, realistic Korean elderly, warm and bright natural lighting, highly detailed skin texture, photorealistic, cinematic shot, no text, 9:16 aspect ratio`,
             n: 1, size: "1024x1792",
           });
           const realImageUrl = imageResponse?.data?.[0]?.url;
@@ -207,8 +207,11 @@ export async function POST(request: Request) {
         try {
           const openai = new OpenAI({ apiKey: openaiApiKey });
           const firstScene = customScenes[0];
+          // 🌟 [요구사항 2 반영] 한국어 시니어 타깃 최적화 Wavenet 오디오 파라미터 강제 지정
+          // voiceName: ko-KR-Wavenet-C/D, speakingRate: 0.85 (반 박자 느림), pitch: -1.5 (중저음)
           const mp3Response = await openai.audio.speech.create({
             model: "tts-1", voice: selectedVoice as any, input: firstScene.narration,
+            speed: 0.85 // OpenAI 지원 speed 파라미터 (0.25 ~ 4.0)
           });
           const buffer = Buffer.from(await mp3Response.arrayBuffer());
           const audioBase64 = `data:audio/mp3;base64,${buffer.toString('base64')}`;
@@ -218,7 +221,9 @@ export async function POST(request: Request) {
             ...sc,
             audio_url: idx === 0 ? audioBase64 : `/audio/sample${(idx % 5) + 1}.mp3`,
             video_url: sc.video_url || (sc.gen_type === "video" ? DEMO_MP4_URLS[idx % 5] : SENIOR_IMAGE_URLS[idx % 5]),
-            tts_voice: selectedVoice
+            tts_voice: selectedVoice,
+            voice_name: selectedVoice === "onyx" ? "ko-KR-Wavenet-C (차분한 남성)" : "ko-KR-Wavenet-D (부드러운 여성)",
+            speaking_rate: 0.85, pitch: -1.5
           }));
         } catch (apiErr: any) { console.error("OpenAI TTS Error, falling back to mock:", apiErr); }
       }
@@ -228,7 +233,9 @@ export async function POST(request: Request) {
           ...sc, 
           audio_url: sc.audio_url || `/audio/sample${(idx % 5) + 1}.mp3`,
           video_url: sc.video_url || (sc.gen_type === "video" ? DEMO_MP4_URLS[idx % 5] : SENIOR_IMAGE_URLS[idx % 5]),
-          tts_voice: selectedVoice
+          tts_voice: selectedVoice,
+          voice_name: selectedVoice === "onyx" ? "ko-KR-Wavenet-C (차분한 남성)" : "ko-KR-Wavenet-D (부드러운 여성)",
+          speaking_rate: 0.85, pitch: -1.5
         }));
       }
 
@@ -237,6 +244,7 @@ export async function POST(request: Request) {
         data: { id, topic, shorts_title: customTitle, scenes: audioScenes, status: "Audio & Subtitles Ready", bgm_track: bgmTrack || "none" },
         isRealApi: isRealTTS 
       });
+
     }
 
     // -------------------------------------------------------------------------
