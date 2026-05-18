@@ -739,14 +739,35 @@ export default function Home() {
                       
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                         {editableIdea.scenes?.map((scene) => (
-                          <div key={scene.scene_no} className="space-y-3 bg-white p-4 rounded-2xl border border-slate-200">
-                            <div className="text-xs font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded inline-block">Scene {scene.scene_no}</div>
-                            <textarea
-                              rows={3}
-                              className="w-full text-[10px] text-slate-500 bg-slate-50 p-2 rounded-lg border border-slate-200 focus:outline-none resize-none font-mono"
-                              value={scene.visual_prompt}
-                              readOnly
-                            />
+                          <div key={scene.scene_no} className="space-y-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                            <div className="flex items-center justify-between">
+                              <div className="text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md inline-block border border-slate-200">Scene {scene.scene_no}</div>
+                              <span className="text-[10px] text-slate-400 font-medium">9:16 세로형</span>
+                            </div>
+                            <div className="space-y-1.5">
+                              <span className="text-[10px] font-bold text-amber-600 flex items-center gap-1">
+                                <Sparkles className="w-3 h-3" />
+                                <span>한글 연출 설명</span>
+                              </span>
+                              <textarea
+                                rows={2}
+                                className="w-full text-xs text-slate-800 bg-amber-50/50 p-2.5 rounded-xl border border-amber-200 focus:outline-none resize-none font-medium"
+                                value={scene.visual_prompt_kr || "AI가 한글 연출 설명을 작성했습니다."}
+                                readOnly
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <span className="text-[10px] font-bold text-slate-500 flex items-center gap-1">
+                                <FileText className="w-3 h-3" />
+                                <span>AI 영문 프롬프트 (고정값 포함)</span>
+                              </span>
+                              <textarea
+                                rows={3}
+                                className="w-full text-[10px] text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-200 focus:outline-none resize-none font-mono leading-relaxed"
+                                value={scene.visual_prompt}
+                                readOnly
+                              />
+                            </div>
                             {studioImageBase64[scene.scene_no] ? (
                               <div className="space-y-3">
                                 <div 

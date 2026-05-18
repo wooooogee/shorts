@@ -21,18 +21,34 @@ const SENIOR_IMAGE_URLS = [
 ];
 
 // 🌟 [핵심 추가] 뉴스 주제(Topic)별 스마트 Fallback 대본 및 최고급 디테일 프롬프트 동적 생성기 (Top 10 뉴스 완벽 대응)
+// 🌟 [핵심 추가] 뉴스 주제(Topic)별 스마트 Fallback 대본 및 최고급 디테일 프롬프트 동적 생성기 (Top 10 뉴스 완벽 대응)
 function generateSmartFallback(topic: string) {
   const cleanTopic = topic || "시니어 맞춤형 콘텐츠";
-  const fixedParams = ", shot on 85mm lens, f/1.8 aperture, cinematic lighting, realistic skin texture, subtle wrinkles, natural pores, caught in a candid moment, non-symmetrical face, authentic Korean senior, soft natural light, no airbrushing, look like a real documentary photograph, depth of field, 8k resolution --ar 9:16";
+  const isBizTopic = cleanTopic.includes("매출") || cleanTopic.includes("마케팅") || cleanTopic.includes("절세") || cleanTopic.includes("고객") || cleanTopic.includes("소상공인") || cleanTopic.includes("직원") || cleanTopic.includes("단골") || cleanTopic.includes("창업");
+
+  const seniorFixedParams = ", shot on 85mm lens, f/1.8 aperture, cinematic lighting, realistic skin texture, subtle wrinkles, natural pores, caught in a candid moment, non-symmetrical face, authentic Korean senior, soft natural light, no airbrushing, look like a real documentary photograph, depth of field, 8k resolution --ar 9:16";
+  const bizFixedParams = ", shot on 35mm lens, f/2.8 aperture, professional commercial lighting, vibrant colors, clean modern neat store background, authentic Korean small business owner, bustling atmosphere with happy customers, sharp focus, 8k resolution --ar 9:16";
+  const fixedParams = isBizTopic ? bizFixedParams : seniorFixedParams;
   
+  if (isBizTopic) {
+    return {
+      shorts_title: `${cleanTopic} (매출 2배 뛰는 실전 노하우)`,
+      scenes: [
+        { scene_id: 1, narration: "사장님들! 요즘 매장 운영하시기 참 힘드시죠?", image_prompt: "[영상] 열정적인 소상공인 사장님이 깔끔한 매장에서 카메라를 바라보는 모습. Cinematic tracking shot, a passionate small business owner looking at the camera in a neat store, bright lighting" + fixedParams, image_prompt_kr: "열정적인 소상공인 사장님이 깔끔한 매장에서 카메라를 바라보는 모습", gen_type: "video" },
+        { scene_no: 2, narration: "오늘 알려드리는 이 방법 하나면 단골 손님이 2배로 늘어납니다.", image_prompt: "[이미지] 빛나는 마케팅 비법 책을 들고 있는 사장님의 자신감 넘치는 모습. Holding a shining secret marketing book, cinematic style" + fixedParams, image_prompt_kr: "빛나는 마케팅 비법 책을 들고 있는 사장님의 자신감 넘치는 모습", gen_type: "image" },
+        { scene_no: 3, narration: "작은 변화가 큰 매출을 만듭니다. 오늘 바로 시작해보세요!", image_prompt: "[영상] 카운터에서 결제하는 행복한 손님들로 가득 찬 활기찬 매장 풍경. A crowded store with happy customers paying at the counter, dynamic angle" + fixedParams, image_prompt_kr: "카운터에서 결제하는 행복한 손님들로 가득 찬 활기찬 매장 풍경", gen_type: "video" }
+      ]
+    };
+  }
+
   return {
     shorts_title: `${cleanTopic} (AI 대본 생성 안내)`,
     scenes: [
-      { scene_id: 1, narration: "AI API 키가 연동되지 않았거나 호출 한도를 초과했습니다.", image_prompt: "[영상] 안내 데스크에서 친절하게 설명하는 직원. Cinematic tracking shot, a professional consultant explaining kindly at a modern clean desk, bright lighting" + fixedParams, gen_type: "video" },
-      { scene_id: 2, narration: "상단의 API 키 설정 탭에서 유효한 Google Gemini API 키를 입력해 주세요.", image_prompt: "[이미지] 깔끔한 컴퓨터 화면의 설정 창. A clean computer screen showing settings in a bright modern office, sharp focus" + fixedParams, gen_type: "image" },
-      { scene_id: 3, narration: "키를 입력하시면 100% 구글 네이티브 AI로 대본과 프롬프트가 자동 생성됩니다.", image_prompt: "[이미지] 환하게 웃는 노신사. A dignified Korean senior man smiling warmly in a bright clean room" + fixedParams, gen_type: "image" },
-      { scene_id: 4, narration: "대본 생성뿐 아니라 고화질 썸네일과 AI 성우 음성까지 원스톱으로 지원합니다.", image_prompt: "[이미지] 쾌적한 스튜디오 환경. A bright modern studio environment with professional lighting equipment" + fixedParams, gen_type: "image" },
-      { scene_id: 5, narration: "지금 API 키를 설정하고 나만의 멋진 쇼츠를 만들어보세요!", image_prompt: "[영상] 카메라를 향해 손을 흔드는 노부부. Cinematic slow motion tracking shot, a happy Korean elderly couple waving hands towards the camera, bright warm sunlight" + fixedParams, gen_type: "video" }
+      { scene_id: 1, narration: "AI API 키가 연동되지 않았거나 호출 한도를 초과했습니다.", image_prompt: "[영상] 안내 데스크에서 친절하게 설명하는 직원. Cinematic tracking shot, a professional consultant explaining kindly at a modern clean desk, bright lighting" + fixedParams, image_prompt_kr: "안내 데스크에서 친절하게 설명하는 직원", gen_type: "video" },
+      { scene_id: 2, narration: "상단의 API 키 설정 탭에서 유효한 Google Gemini API 키를 입력해 주세요.", image_prompt: "[이미지] 깔끔한 컴퓨터 화면의 설정 창. A clean computer screen showing settings in a bright modern office, sharp focus" + fixedParams, image_prompt_kr: "깔끔한 컴퓨터 화면의 설정 창", gen_type: "image" },
+      { scene_id: 3, narration: "키를 입력하시면 100% 구글 네이티브 AI로 대본과 프롬프트가 자동 생성됩니다.", image_prompt: "[이미지] 환하게 웃는 노신사. A dignified Korean senior man smiling warmly in a bright clean room" + fixedParams, image_prompt_kr: "환하게 웃는 노신사", gen_type: "image" },
+      { scene_id: 4, narration: "대본 생성뿐 아니라 고화질 썸네일과 AI 성우 음성까지 원스톱으로 지원합니다.", image_prompt: "[이미지] 쾌적한 스튜디오 환경. A bright modern studio environment with professional lighting equipment" + fixedParams, image_prompt_kr: "쾌적한 스튜디오 환경", gen_type: "image" },
+      { scene_id: 5, narration: "지금 API 키를 설정하고 나만의 멋진 쇼츠를 만들어보세요!", image_prompt: "[영상] 카메라를 향해 손을 흔드는 노부부. Cinematic slow motion tracking shot, a happy Korean elderly couple waving hands towards the camera, bright warm sunlight" + fixedParams, image_prompt_kr: "카메라를 향해 손을 흔드는 노부부", gen_type: "video" }
     ]
   };
 }
@@ -44,8 +60,10 @@ export async function POST(request: Request) {
 
     const geminiApiKey = apiKeys?.geminiKey?.trim() || process.env.GEMINI_API_KEY || "";
 
-    // 필수 고정 세팅 값 (시니어 타겟 실사 숏폼 최적화 파라미터)
-    const fixedParams = ", shot on 85mm lens, f/1.8 aperture, cinematic lighting, realistic skin texture, subtle wrinkles, natural pores, caught in a candid moment, non-symmetrical face, authentic Korean senior, soft natural light, no airbrushing, look like a real documentary photograph, depth of field, 8k resolution --ar 9:16";
+    const isBizTopic = topic?.includes("매출") || topic?.includes("마케팅") || topic?.includes("절세") || topic?.includes("고객") || topic?.includes("소상공인") || topic?.includes("직원") || topic?.includes("단골") || topic?.includes("창업");
+    const seniorFixedParams = ", shot on 85mm lens, f/1.8 aperture, cinematic lighting, realistic skin texture, subtle wrinkles, natural pores, caught in a candid moment, non-symmetrical face, authentic Korean senior, soft natural light, no airbrushing, look like a real documentary photograph, depth of field, 8k resolution --ar 9:16";
+    const bizFixedParams = ", shot on 35mm lens, f/2.8 aperture, professional commercial lighting, vibrant colors, clean modern neat store background, authentic Korean small business owner, bustling atmosphere with happy customers, sharp focus, 8k resolution --ar 9:16";
+    const fixedParams = isBizTopic ? bizFixedParams : seniorFixedParams;
 
     // -------------------------------------------------------------------------
     // [Step 2] AI 대본 및 맞춤형 프롬프트 생성 단계 (사용자 직접 생성용 한글+영어 하이브리드)
@@ -58,11 +76,11 @@ export async function POST(request: Request) {
         try {
           const sysPrompt = `당신은 유튜브 숏폼 대본 및 최고급 AI 시각화 프롬프트 엔지니어입니다.
 주제: ${topic || "2026년 시니어 복지 꿀팁"}
-위 주제로 시니어(6070) 타겟의 50초 숏폼 대본(총 ${sceneCount}개 씬)을 작성하세요.
+위 주제로 ${isBizTopic ? "소상공인 및 자영업자" : "시니어(6070)"} 타겟의 50초 숏폼 대본(총 ${sceneCount}개 씬)을 작성하세요.
 각 씬마다 'gen_type'을 'video' 또는 'image' 중 하나로 적절히 할당하세요.
-[중요: 시니어 타겟 내레이션 작성 지침]
-- 어르신들이 듣기에 말이 너무 빠르지 않도록 문장의 길이를 간결하게 하고, 호흡 간격을 여유롭게 배치하세요.
-- AI 성우가 차분하고 느린 톤으로 낭독할 수 있도록 발음하기 편한 단어와 자연스러운 경어체를 사용하세요.
+[중요: 내레이션 작성 지침]
+- 듣기에 말이 너무 빠르지 않도록 문장의 길이를 간결하게 하고, 호흡 간격을 여유롭게 배치하세요.
+- AI 성우가 차분하고 명확한 톤으로 낭독할 수 있도록 발음하기 편한 단어와 자연스러운 경어체를 사용하세요.
 
 사용자가 직접 외부 최고급 AI 툴(Luma Dream Machine, Midjourney v6 등)에 복사해서 최상의 결과물을 얻을 수 있도록 'image_prompt' 필드를 아래 규칙으로 '극도로 디테일하게' 작성하세요.
 
@@ -70,18 +88,18 @@ export async function POST(request: Request) {
 - 카메라 앵글(Wide shot, Tracking shot 등), 인물의 미세한 표정과 행동 변화, 주변 환경의 디테일, 시간대, 빛의 느낌, 그리고 구체적인 카메라 무빙(Slow pan, slight zoom in 등)을 포함하여 작성하세요.
 - 반드시 [영상] 말머리와 함께 상황을 설명하는 한글 1~2문장 뒤에 핵심 영문 프롬프트를 적고, 맨 끝에 아래의 고정 파라미터 문자열을 반드시 그대로 붙여주세요.
 - 고정 파라미터: ${fixedParams}
-- (예시: [영상] 햇살이 비치는 공원에서 활짝 웃으며 걷는 시니어 부부. Cinematic tracking shot, a dignified Korean elderly couple walking happily in a beautiful lush park, warm morning sunlight filtering through trees, highly detailed, realistic motion, slow pan to the right${fixedParams})
 
 2. gen_type이 'image' (나노바나나)인 경우: 
-- 인물의 옷차림, 나이대(60s, 70s), 표정, 배경의 구체적인 소품 등을 설명하는 핵심 영문 프롬프트를 적고, 맨 끝에 아래의 고정 파라미터 문자열을 반드시 그대로 붙여주세요.
+- 인물의 옷차림, 표정, 배경의 구체적인 소품 등을 설명하는 핵심 영문 프롬프트를 적고, 맨 끝에 아래의 고정 파라미터 문자열을 반드시 그대로 붙여주세요.
 - 고정 파라미터: ${fixedParams}
-- (예시: [이미지] 세련된 거실에서 차를 마시며 여유롭게 미소 짓는 노부부. A highly detailed portrait of an elegant Korean elderly couple in their 70s, drinking tea in a modern cozy living room, warm morning sunlight streaming through the window, kind smile, wearing neat casual clothes${fixedParams})
+
+3. [핵심 추가] 각 씬의 'image_prompt_kr' 필드에는 해당 씬이 어떤 화면을 연출하는 것인지 직관적이고 구체적인 한글 묘사를 1~2문장으로 작성해주세요.
 
 응답은 반드시 아래 JSON 구조만 반환하세요:
 {
   "shorts_title": "숏폼 제목",
   "scenes": [
-    { "scene_id": 1, "narration": "내레이션", "image_prompt": "프롬프트", "gen_type": "video" }
+    { "scene_id": 1, "narration": "내레이션", "image_prompt": "프롬프트 (영어) + 고정 파라미터", "image_prompt_kr": "프롬프트 한글 연출 설명", "gen_type": "video" }
   ]
 }`;
           
@@ -112,7 +130,7 @@ export async function POST(request: Request) {
       } else {
         // 🌟 [핵심 요구사항 반영] AI가 생성한 프롬프트에도 필수 고정 세팅 값이 누락되었을 경우 완벽하게 자동 주입
         scriptResult.scenes.forEach((sc: any) => {
-          if (!sc.image_prompt.includes("85mm lens")) {
+          if (!sc.image_prompt.includes("8k resolution")) {
             sc.image_prompt += fixedParams;
           }
         });
