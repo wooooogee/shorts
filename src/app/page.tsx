@@ -39,6 +39,8 @@ const BIZ_TOPICS = [
 
 interface IdeaOutput {
   title: string;
+  titles?: string[];
+  subtitles?: string[];
   topic: string;
   tags: string[];
   script: string;
@@ -638,18 +640,11 @@ export default function Home() {
                     </select>
                   </div>
 
-                  <div className="flex items-center gap-2.5 bg-white px-4 py-2 rounded-xl border border-slate-300 shadow-sm">
-                    <input 
-                      type="checkbox" 
-                      id="includeTitle"
-                      checked={includeTitleText} 
-                      onChange={(e) => setIncludeTitleText(e.target.checked)}
-                      className="w-4 h-4 text-amber-600 border-slate-300 rounded focus:ring-amber-500 cursor-pointer"
-                    />
-                    <label htmlFor="includeTitle" className="text-xs font-bold text-slate-700 cursor-pointer select-none flex items-center gap-1.5">
-                      <Type className="w-4 h-4 text-amber-500" />
-                      <span>씬 이미지에 제목 텍스트(자막 연출) 입히기</span>
-                    </label>
+                  <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 px-4 py-2.5 rounded-xl shadow-sm">
+                    <Sparkles className="w-4 h-4 text-amber-500 animate-spin" />
+                    <span className="text-xs font-extrabold text-amber-800">
+                      💡 AI 추천 제목 & 훅 자막 3개 자동 생성 (디테일 대본 모드)
+                    </span>
                   </div>
                 </div>
 
@@ -701,16 +696,56 @@ export default function Home() {
                       </div>
                       <input 
                         type="text"
-                        className="text-lg font-bold leading-tight w-full bg-white border border-slate-300 hover:border-slate-400 focus:border-amber-500 focus:outline-none transition-colors px-4 py-3 rounded-xl text-slate-900"
+                        className="text-lg font-bold leading-tight w-full bg-white border border-slate-300 hover:border-slate-400 focus:border-amber-500 focus:outline-none transition-colors px-4 py-3 rounded-xl text-slate-900 shadow-inner"
                         value={editableIdea.title}
                         onChange={(e) => handleUpdateEditableIdea('title', e.target.value)}
                       />
                       <div className="flex flex-wrap gap-2 pt-1">
                         {Array.isArray(editableIdea.tags) && editableIdea.tags.map((tag, i) => (
-                          <span key={i} className="text-xs font-semibold text-slate-600 bg-white px-3 py-1 rounded-full border border-slate-200">#{tag}</span>
+                          <span key={i} className="text-xs font-semibold text-slate-600 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm">#{tag}</span>
                         ))}
                       </div>
                     </div>
+
+                    {/* AI 추천 숏폼 제목 3선 */}
+                    {editableIdea.titles && editableIdea.titles.length > 0 && (
+                      <div className="space-y-2 bg-amber-50/50 p-4 rounded-2xl border border-amber-200 shadow-sm">
+                        <label className="text-xs font-extrabold text-amber-800 flex items-center gap-1.5">
+                          <Sparkles className="w-4 h-4 text-amber-600" />
+                          <span>🔥 AI 추천 숏폼 제목 3선 (클릭 시 대표 제목으로 즉시 반영)</span>
+                        </label>
+                        <div className="space-y-1.5">
+                          {editableIdea.titles.map((recTitle, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => handleUpdateEditableIdea('title', recTitle)}
+                              className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold bg-white border border-amber-200 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-all shadow-sm flex items-center gap-2 group"
+                            >
+                              <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 group-hover:bg-white group-hover:text-amber-600 font-mono text-[10px]">#{idx + 1}</span>
+                              <span className="truncate flex-1">{recTitle}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* AI 추천 훅 자막 3선 */}
+                    {editableIdea.subtitles && editableIdea.subtitles.length > 0 && (
+                      <div className="space-y-2 bg-blue-50/50 p-4 rounded-2xl border border-blue-200 shadow-sm">
+                        <label className="text-xs font-extrabold text-blue-800 flex items-center gap-1.5">
+                          <Type className="w-4 h-4 text-blue-600" />
+                          <span>💡 AI 추천 훅(Hook) 자막 3선 (썸네일 및 초반 3초 어그로용)</span>
+                        </label>
+                        <div className="space-y-1.5">
+                          {editableIdea.subtitles.map((recSub, idx) => (
+                            <div key={idx} className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white border border-blue-200 text-slate-800 shadow-sm flex items-center gap-2">
+                              <span className="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 font-mono text-[10px]">Hook #{idx + 1}</span>
+                              <span className="flex-1">{recSub}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     <div className="h-px bg-slate-200 w-full" />
 
@@ -718,11 +753,11 @@ export default function Home() {
                       <div className="space-y-2">
                         <h4 className="flex items-center gap-2 text-xs font-bold text-slate-700 border-l-2 border-amber-500 pl-3">
                           <FileText className="w-4 h-4 text-amber-500" />
-                          <span>자막 및 내레이션 대본</span>
+                          <span>자막 및 내레이션 대본 (디테일 & 분량 강화)</span>
                         </h4>
                         <textarea
-                          rows={6}
-                          className="w-full text-slate-800 leading-relaxed bg-white border border-slate-300 hover:border-slate-400 focus:border-amber-500 focus:outline-none p-4 rounded-2xl text-xs resize-y transition-colors font-medium"
+                          rows={8}
+                          className="w-full text-slate-800 leading-relaxed bg-white border border-slate-300 hover:border-slate-400 focus:border-amber-500 focus:outline-none p-4 rounded-2xl text-xs resize-y transition-colors font-medium shadow-inner"
                           value={editableIdea.script}
                           onChange={(e) => handleUpdateEditableIdea('script', e.target.value)}
                         />
@@ -735,7 +770,7 @@ export default function Home() {
                         </h4>
                         <textarea
                           rows={3}
-                          className="w-full text-slate-700 leading-relaxed bg-white border border-slate-300 hover:border-slate-400 focus:border-amber-500 focus:outline-none p-3 rounded-xl text-xs resize-y transition-colors font-mono"
+                          className="w-full text-slate-700 leading-relaxed bg-white border border-slate-300 hover:border-slate-400 focus:border-amber-500 focus:outline-none p-3 rounded-xl text-xs resize-y transition-colors font-mono shadow-inner"
                           value={editableIdea.visuals}
                           onChange={(e) => handleUpdateEditableIdea('visuals', e.target.value)}
                         />
@@ -748,7 +783,7 @@ export default function Home() {
                         </h4>
                         <input
                           type="text"
-                          className="w-full text-slate-700 bg-white border border-slate-300 hover:border-slate-400 focus:border-amber-500 focus:outline-none px-4 py-3 rounded-xl text-xs transition-colors"
+                          className="w-full text-slate-700 bg-white border border-slate-300 hover:border-slate-400 focus:border-amber-500 focus:outline-none px-4 py-3 rounded-xl text-xs transition-colors shadow-inner"
                           value={editableIdea.bgm}
                           onChange={(e) => handleUpdateEditableIdea('bgm', e.target.value)}
                         />
@@ -764,9 +799,9 @@ export default function Home() {
                         <div className="space-y-2">
                           <h3 className="text-lg font-bold flex items-center gap-2 text-slate-900">
                             <ImageIcon className="w-5 h-5 text-amber-500" />
-                            <span>2. 씬별 이미지 생성 (개별 탭 상세 뷰)</span>
+                            <span>2. 씬별 상세 관리 및 이미지 생성</span>
                           </h3>
-                          <p className="text-slate-500 text-xs">원하시는 씬 탭을 선택하여 프롬프트를 크게 확인하고, 고화질 9:16 이미지를 생성/다운로드하세요.</p>
+                          <p className="text-slate-500 text-xs">원하시는 씬 탭을 선택하여 내레이션과 프롬프트를 확인/수정하고, 고화질 9:16 이미지를 생성하세요.</p>
                         </div>
                         
                         {/* 씬 선택 버튼 목록 */}
@@ -787,14 +822,33 @@ export default function Home() {
                       {/* 선택된 단 하나의 씬 상세 카드 뷰 */}
                       {editableIdea.scenes?.filter(sc => sc.scene_no === activeSceneTab).map((scene) => (
                         <div key={scene.scene_no} className="grid grid-cols-1 lg:grid-cols-2 gap-8 bg-white p-8 rounded-3xl border border-slate-200 shadow-md animate-fadeIn">
-                          {/* 좌측: 프롬프트 및 설명 (크게 보기) */}
+                          {/* 좌측: 프롬프트, 내레이션 및 설명 (크게 보기) */}
                           <div className="space-y-6 flex flex-col justify-center">
                             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                               <div className="text-sm font-extrabold text-slate-800 bg-amber-100/80 px-3.5 py-1.5 rounded-lg border border-amber-200 flex items-center gap-1.5">
                                 <Film className="w-4 h-4 text-amber-600" />
-                                <span>Scene {scene.scene_no} 연출 기획</span>
+                                <span>Scene {scene.scene_no} 상세 기획</span>
                               </div>
                               <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">9:16 세로형 숏폼</span>
+                            </div>
+
+                            {/* 씬 내레이션 (디테일 강화) */}
+                            <div className="space-y-2.5">
+                              <label className="text-xs font-bold text-blue-600 flex items-center gap-1.5">
+                                <FileText className="w-4 h-4" />
+                                <span>이 씬의 내레이션 대사 (디테일 강화)</span>
+                              </label>
+                              <textarea
+                                rows={4}
+                                className="w-full text-xs text-slate-900 bg-blue-50/60 p-4 rounded-2xl border border-blue-200 focus:outline-none focus:border-blue-400 resize-y font-bold leading-relaxed shadow-inner"
+                                value={scene.narration}
+                                onChange={(e) => {
+                                  const updatedScenes = editableIdea.scenes?.map(sc => sc.scene_no === scene.scene_no ? { ...sc, narration: e.target.value } : sc);
+                                  if (editableIdea && updatedScenes) {
+                                    setEditableIdea({ ...editableIdea, scenes: updatedScenes });
+                                  }
+                                }}
+                              />
                             </div>
 
                             <div className="space-y-2.5">
@@ -804,7 +858,7 @@ export default function Home() {
                               </label>
                               <textarea
                                 rows={3}
-                                className="w-full text-sm text-slate-800 bg-amber-50/60 p-4 rounded-2xl border border-amber-200 focus:outline-none resize-none font-medium leading-relaxed shadow-inner"
+                                className="w-full text-xs text-slate-800 bg-amber-50/60 p-4 rounded-2xl border border-amber-200 focus:outline-none resize-none font-medium leading-relaxed shadow-inner"
                                 value={scene.visual_prompt_kr || "AI가 한글 연출 설명을 작성했습니다."}
                                 readOnly
                               />
