@@ -54,7 +54,7 @@ export async function POST(request: Request) {
 
         const result = await model.generateContent({
           contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.9 } // 다양성과 신선함 극대화
+          generationConfig: { temperature: 0.9, maxOutputTokens: 4096 } // 다양성과 신선함 극대화 및 응답 잘림 방지
         });
 
         const text = result.response.text();
