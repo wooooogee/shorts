@@ -2,12 +2,15 @@ import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // 토픽별 스마트 Fallback 데이터 (API 실패 또는 키 미설정 시 완벽 동작 보장 - 최신 알짜 정보 반영)
-function getFallbackIdea(topic: string) {
+// 토픽별 스마트 Fallback 데이터 (API 실패 또는 키 미설정 시 완벽 동작 보장 - 최신 알짜 정보 반영)
+function getFallbackIdea(topic: string, includeTitleText: boolean = false) {
   const cleanTopic = topic || "시니어 맞춤형 콘텐츠";
   const isBizTopic = cleanTopic.includes("매출") || cleanTopic.includes("마케팅") || cleanTopic.includes("절세") || cleanTopic.includes("고객") || cleanTopic.includes("소상공인") || cleanTopic.includes("직원") || cleanTopic.includes("단골") || cleanTopic.includes("창업") || cleanTopic.includes("지원금");
 
   const seniorFixedParams = ", shot on 85mm lens, f/1.8 aperture, cinematic lighting, realistic skin texture, subtle wrinkles, natural pores, caught in a candid moment, non-symmetrical face, authentic Korean senior, soft natural light, no airbrushing, look like a real documentary photograph, depth of field, 8k resolution --ar 9:16";
   const bizFixedParams = ", shot on 35mm lens, f/2.8 aperture, professional commercial lighting, vibrant colors, clean modern neat store background, authentic Korean small business owner, bustling atmosphere with happy customers, sharp focus, 8k resolution --ar 9:16";
+
+  const titleTextPrompt = includeTitleText ? ", with bold elegant Korean typography overlay at the top saying the video title" : "";
 
   if (isBizTopic) {
     return {
@@ -18,7 +21,7 @@ function getFallbackIdea(topic: string) {
       visuals: "A bustling modern cafe with happy customers and a smiling owner holding a smart tablet showing utility bill discount, professional bright lighting, cinematic photography",
       bgm: "경쾌하고 희망찬 어쿠스틱 기타 곡",
       scenes: [
-        { scene_no: 1, narration: "사장님들! 요즘 전기요금 비롯해 매장 고정비 내시기 참 부담되시죠?", visual_prompt: "A passionate small business owner looking at utility bills with a serious but hopeful expression in a neat store, bright lighting" + bizFixedParams, visual_prompt_kr: "진지하면서도 희망찬 표정으로 고지서를 바라보는 소상공인 사장님의 모습" },
+        { scene_no: 1, narration: "사장님들! 요즘 전기요금 비롯해 매장 고정비 내시기 참 부담되시죠?", visual_prompt: "A passionate small business owner looking at utility bills with a serious but hopeful expression in a neat store, bright lighting" + titleTextPrompt + bizFixedParams, visual_prompt_kr: "진지하면서도 희망찬 표정으로 고지서를 바라보는 소상공인 사장님의 모습 (상단 제목 텍스트 포함)" },
         { scene_no: 2, narration: "올해부터 연매출 6천만원 이하 매장은 전기요금을 최대 20만원까지 환급받을 수 있습니다.", visual_prompt: "Holding a shining smart tablet showing 200,000 KRW refund graphic, cinematic style" + bizFixedParams, visual_prompt_kr: "20만원 환급 그래픽이 띄워진 스마트 태블릿을 들고 있는 사장님의 환한 미소" },
         { scene_no: 3, narration: "소상공인 전기요금 특별지원 사이트에서 사업자등록번호만 넣으면 끝! 지금 바로 신청하세요.", visual_prompt: "A crowded store with happy customers paying at the counter, dynamic angle" + bizFixedParams, visual_prompt_kr: "고정비 절감으로 여유를 찾아 활기차게 손님을 맞이하는 매장 카운터 풍경" }
       ]
@@ -33,7 +36,7 @@ function getFallbackIdea(topic: string) {
     visuals: "A dignified Korean senior smiling confidently holding a job application document in a bright modern community center, professional clean atmosphere",
     bgm: "차분하고 신뢰감을 주는 따뜻한 피아노 연주곡",
     scenes: [
-      { scene_no: 1, narration: "어르신들! 은퇴 후 보람찬 경제활동을 찾고 계셨다면 올해가 절호의 기회입니다.", visual_prompt: "A friendly senior lifestyle partner greeting the camera in a modern community center, bright lighting" + seniorFixedParams, visual_prompt_kr: "밝고 모던한 복지센터에서 카메라를 향해 환하게 미소 짓는 어르신의 모습" },
+      { scene_no: 1, narration: "어르신들! 은퇴 후 보람찬 경제활동을 찾고 계셨다면 올해가 절호의 기회입니다.", visual_prompt: "A friendly senior lifestyle partner greeting the camera in a modern community center, bright lighting" + titleTextPrompt + seniorFixedParams, visual_prompt_kr: "밝고 모던한 복지센터에서 카메라를 향해 환하게 미소 짓는 어르신의 모습 (상단 제목 텍스트 포함)" },
       { scene_no: 2, narration: "정부 노인 일자리가 120만 개로 대폭 늘어나고, 특히 수당이 높은 사회서비스형이 확대되었습니다.", visual_prompt: "Holding a shining info card showing 1.2M jobs graphic, cinematic style" + seniorFixedParams, visual_prompt_kr: "120만 일자리 확대 그래픽이 담긴 빛나는 카드를 들고 설명하는 모습" },
       { scene_no: 3, narration: "가까운 행정복지센터나 시니어클럽에 신분증 지참 후 방문하세요. 새로운 도전, 지금 시작해보세요!", visual_prompt: "Walking confidently towards a modern office desk, dynamic angle" + seniorFixedParams, visual_prompt_kr: "당당한 발걸음으로 복지센터 상담 창구를 향해 걸어가는 활기찬 뒷모습" }
     ]
@@ -42,7 +45,7 @@ function getFallbackIdea(topic: string) {
 
 export async function POST(request: Request) {
   try {
-    const { topic, sceneCount = 4, apiKeys } = await request.json();
+    const { topic, sceneCount = 4, includeTitleText = false, apiKeys } = await request.json();
     const apiKey = apiKeys?.geminiKey?.trim() || process.env.GEMINI_API_KEY || "";
 
     if (apiKey) {
@@ -58,10 +61,14 @@ export async function POST(request: Request) {
         const bizFixedParams = ", shot on 35mm lens, f/2.8 aperture, professional commercial lighting, vibrant colors, clean modern neat store background, authentic Korean small business owner, bustling atmosphere with happy customers, sharp focus, 8k resolution --ar 9:16";
         const selectedFixedParams = isBizTopic ? bizFixedParams : seniorFixedParams;
 
+        const titleInstruction = includeTitleText 
+          ? `\n[🏷️ 텍스트 오버레이 특별 요구사항]\n사용자가 씬 이미지에 제목 텍스트 입히기를 선택했습니다. 1번 씬(Scene 1)의 visual_prompt 맨 앞부분에 반드시 "A captivating vertical image with bold elegant typography overlay at the top saying the video title," 문구를 추가하여 이미지 생성 시 제목이 멋지게 새겨지도록 연출하세요.` 
+          : "";
+
         const prompt = `당신은 ${producerRole}입니다.
 타깃 시청자: ${targetAudience}
 주목할 점: 이미지 생성 시 타깃 시청자에 맞춘 최고급 실사 고정 파라미터가 적용됩니다.
-주제: "${topic}"
+주제: "${topic}"${titleInstruction}
 
 [🔥 핵심 요구사항: 최신 뉴스 반영 및 뻔한 소리 철저 배제]
 1. 누구나 아는 뻔하고 진부한 소리(예: '손님에게 친절하세요', '물을 많이 마시세요', '규칙적으로 운동하세요')는 절대 금지합니다.
@@ -115,7 +122,7 @@ export async function POST(request: Request) {
     }
 
     // API 키가 없거나 호출 실패 시 스마트 Fallback 반환
-    const fallbackData = getFallbackIdea(topic);
+    const fallbackData = getFallbackIdea(topic, includeTitleText);
     return NextResponse.json(fallbackData);
 
   } catch (error: any) {
