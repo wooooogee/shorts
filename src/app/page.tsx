@@ -44,7 +44,7 @@ interface IdeaOutput {
   script: string;
   visuals: string;
   bgm: string;
-  scenes?: { scene_no: number, narration: string, visual_prompt: string }[];
+  scenes?: { scene_no: number, narration: string, visual_prompt: string, visual_prompt_kr?: string }[];
 }
 
 export default function Home() {
