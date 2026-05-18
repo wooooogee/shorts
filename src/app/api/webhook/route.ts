@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { id, topic, source, mode, scenes: customScenes, shorts_title: customTitle, apiKeys, ttsVoice, bgmTrack, sceneCount = 5 } = body;
 
-    const geminiApiKey = apiKeys?.geminiKey?.trim() || process.env.GEMINI_API_KEY || "AIzaSyDqIGxREUi3I9YfsAUdzbvgryjt5XBDts8";
+    const geminiApiKey = apiKeys?.geminiKey?.trim() || process.env.GEMINI_API_KEY || "";
 
     // 필수 고정 세팅 값 (시니어 타겟 실사 숏폼 최적화 파라미터)
     const fixedParams = ", shot on 85mm lens, f/1.8 aperture, cinematic lighting, realistic skin texture, subtle wrinkles, natural pores, caught in a candid moment, non-symmetrical face, authentic Korean senior, soft natural light, no airbrushing, look like a real documentary photograph, depth of field, 8k resolution --ar 9:16";

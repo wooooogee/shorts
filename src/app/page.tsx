@@ -54,12 +54,12 @@ export default function Home() {
   const [workflowMode, setWorkflowMode] = useState<"auto" | "semi">("semi");
 
   // API 키 전역 관리 상태 (컴포넌트 상단 배치로 모든 함수에서 안전하게 접근 가능)
-  const [apiKeys, setApiKeys] = useState({ geminiKey: "AIzaSyDqIGxREUi3I9YfsAUdzbvgryjt5XBDts8", openaiKey: "", elevenlabsKey: "" });
+  const [apiKeys, setApiKeys] = useState({ geminiKey: "", openaiKey: "", elevenlabsKey: "" });
   const [showKeys, setShowKeys] = useState({ gemini: false, openai: false, elevenlabs: false });
   const [isKeySaved, setIsKeySaved] = useState(false);
 
   useEffect(() => {
-    const savedGemini = localStorage.getItem("GEMINI_API_KEY") || "AIzaSyDqIGxREUi3I9YfsAUdzbvgryjt5XBDts8";
+    const savedGemini = localStorage.getItem("GEMINI_API_KEY") || "";
     const savedOpenAI = localStorage.getItem("OPENAI_API_KEY") || "";
     const savedEleven = localStorage.getItem("ELEVENLABS_API_KEY") || "";
     setApiKeys({ geminiKey: savedGemini, openaiKey: savedOpenAI, elevenlabsKey: savedEleven });
